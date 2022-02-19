@@ -1,0 +1,85 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar Time
+scalar Upload
+
+# type LoginInvalidInputError {
+#   passwordErrorMessage: String
+#   emailErrorMessage: String
+# }
+
+# type RegisterInvalidInputError {
+#     firstName: String
+#     lastName: String
+#     passwordErrorMessage: String
+#     emailErrorMessage: String
+# }
+
+type Query {
+  GetMe:  User!
+  GetUsers: [User!]!
+}
+
+# type ErrorResponse {
+#   error: Errors!
+#   message: String!
+#   path: [String!]!
+# }
+
+
+# union LoginUserResult = User | LoginInvalidInputError | ErrorResponse
+
+# union RegisterUserResult = User | RegisterInvalidInputError | ErrorResponse
+
+# union UserResult = User | ErrorResponse
+
+type Mutation {
+  CreateUser(data: UserInput!): User!
+  LoginUser(data: LoginInput!): User!
+  Logout: User!
+  GoogleLogin: User!
+  ForgotPassword(email: String!): User!
+}
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String
+  provider: ProviderOptions
+  providerId: String
+  userRole: Role!
+  picture: String
+  updatedAt: Time!
+  createdAt: Time!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input UserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProviderOptions {
+  GOOGLE
+  FACEBOOK
+}
+
+enum Errors {
+  NOT_FOUND
+  INTERNAL_SERVER_ERROR
+}

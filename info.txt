@@ -1,0 +1,15 @@
+PROBLEM STATEMENT
+
+We want to build an e-commerce system where people,companies can sell their products which help them to reach more people through an online platform
+
+Persons Involved(Users)
+- users (visitor or account holders)
+- suppliers
+- admins
+
+User Stories
+
+AS a User I want to see want to view products
+AS a User I want to search for products I want
+AS a User I want to add product to my cart
+As a User I want to wishlist product I like
