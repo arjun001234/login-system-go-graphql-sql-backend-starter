@@ -2,8 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"database/sql"
-	"log"
 	"net/http"
 
 	"github.com/arjun001234/E-Commerce-Go-Server/service"
@@ -65,9 +63,8 @@ func (m *middleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		user, err := m.us.GetUserById(userId)
-		log.Printf("auth middleware user error: %v", err)
-		if err == sql.ErrNoRows {
-			c.String(http.StatusBadRequest, "Session Expired")
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
 			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}

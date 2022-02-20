@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 	"unicode"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 )
 
 type HelpersService interface {
@@ -142,17 +144,10 @@ func (hs *helper) VerifyGoogleToken(g *gin.Context) (*model.User, error) {
 	if err != nil || len(token) == 0 {
 		return nil, err
 	}
-	vt, err := hs.tks.VerifySigningMethod(token, true)
+	payload, err := idtoken.Validate(context.Background(), token, hs.config.GoogleClientId)
 	if err != nil {
-		return nil, err
-	}
-	claims, err := hs.tks.GetClaims(vt)
-	if err != nil {
-		return nil, err
-	}
-	err = hs.tks.CheckExpiration(claims)
-	if err != nil {
-		return nil, err
+		log.Printf("Google Error: %v", err)
+		return nil, fmt.Errorf("google login failed")
 	}
 	provider := model.ProviderOptionsGoogle
 	user := &model.User{
@@ -162,21 +157,14 @@ func (hs *helper) VerifyGoogleToken(g *gin.Context) (*model.User, error) {
 		UserRole:  model.RoleUser,
 		Provider:  &provider,
 	}
-	if aud, ok := claims["aud"].(string); ok {
-		if aud != "812310750447-467stc4njc8db06p2svbg7iqb7t7jti4.apps.googleusercontent.com" {
-			return nil, fmt.Errorf("invalid token")
-		}
-	} else {
-		return nil, fmt.Errorf("inavlid google login")
-	}
-	user.Email = claims["email"].(string)
-	user.FirstName = claims["given_name"].(string)
-	user.LastName = claims["family_name"].(string)
-	picture, ok := claims["picture"].(string)
+	user.Email = payload.Claims["email"].(string)
+	user.FirstName = payload.Claims["given_name"].(string)
+	user.LastName = payload.Claims["family_name"].(string)
+	picture, ok := payload.Claims["picture"].(string)
 	if ok {
 		user.Picture = &picture
 	}
-	providerID, ok := claims["sub"].(string)
+	providerID, ok := payload.Claims["sub"].(string)
 	if ok {
 		user.ProviderID = &providerID
 	}
